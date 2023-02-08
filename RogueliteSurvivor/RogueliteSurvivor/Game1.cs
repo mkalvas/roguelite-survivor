@@ -17,10 +17,11 @@ namespace RogueliteSurvivor
         private TiledMap map;
         private Dictionary<int, TiledTileset> tilesets;
         private Texture2D tilesetTexture;
-        private TiledLayer collisionLayer;
 
         const int scaleFactor = 3;
         private Matrix transformMatrix;
+        private Vector2 playerPosition = new Vector2(5,5);
+        private float playerSpeed = 100f;
 
         public Game1()
         {
@@ -53,6 +54,28 @@ namespace RogueliteSurvivor
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            var kstate = Keyboard.GetState();
+
+            if (kstate.IsKeyDown(Keys.Up))
+            {
+                playerPosition.Y -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
+            if (kstate.IsKeyDown(Keys.Down))
+            {
+                playerPosition.Y += playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
+            if (kstate.IsKeyDown(Keys.Left))
+            {
+                playerPosition.X -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
+
+            if (kstate.IsKeyDown(Keys.Right))
+            {
+                playerPosition.X += playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
 
             // TODO: Add your update logic here
 
@@ -102,7 +125,7 @@ namespace RogueliteSurvivor
                         double rotation = 0f;
 
                         // Render sprite at position tileX, tileY using the rect
-                        _spriteBatch.Draw(tilesetTexture, destination, source, Color.White, (float)rotation, Vector2.Zero, effects, 0);
+                        _spriteBatch.Draw(tilesetTexture, destination, source, Color.White, (float)rotation, playerPosition, effects, 0);
                     }
                 }
             }
