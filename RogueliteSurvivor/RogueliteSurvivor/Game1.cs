@@ -5,6 +5,7 @@ using RogueliteSurvivor.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using TiledCS;
 
@@ -47,7 +48,7 @@ namespace RogueliteSurvivor
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            map = new TiledMap(Content.RootDirectory + "\\Demo.tmx");
+            map = new TiledMap(Path.Combine(Content.RootDirectory, "Demo.tmx"));
             tilesets = map.GetTiledTilesets(Content.RootDirectory + "/");
             tilesetTexture = Content.Load<Texture2D>("Tiles");
 
