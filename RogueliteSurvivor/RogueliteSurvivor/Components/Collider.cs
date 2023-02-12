@@ -1,4 +1,5 @@
-﻿using Box2D.NetStandard.Collision.Shapes;
+﻿using Arch.Core;
+using Box2D.NetStandard.Collision.Shapes;
 using Box2D.NetStandard.Dynamics.Bodies;
 using Microsoft.Xna.Framework;
 using System;
@@ -23,13 +24,18 @@ namespace RogueliteSurvivor.Components
             Offset = new Vector2(width / 2, height / 2);
 
             var bodyShape = new Box2D.NetStandard.Dynamics.Fixtures.FixtureDef();
-            bodyShape.shape = new PolygonShape(width / 2, height / 2);
+            bodyShape.shape = new CircleShape() { Radius = width / 2 };
             bodyShape.density = density;
             bodyShape.friction = 0.0f;
             bodyDef.type = BodyType.Dynamic;
 
             PhysicsBody = physicsWorld.CreateBody(bodyDef);
             PhysicsBody.CreateFixture(bodyShape);
+        }
+
+        public void SetEntityForPhysics(Entity entity)
+        {
+            PhysicsBody.SetUserData(entity);
         }
     }
 }
