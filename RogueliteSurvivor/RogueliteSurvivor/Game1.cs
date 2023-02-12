@@ -38,6 +38,11 @@ namespace RogueliteSurvivor
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            _graphics.ApplyChanges(); //Needed because the graphics device is null before this is called
+            _graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            _graphics.ApplyChanges();
         }
 
         protected override void Initialize()
@@ -73,8 +78,8 @@ namespace RogueliteSurvivor
 
             renderSystems = new List<IRenderSystem>
             {
-                new RenderMapSystem(world),
-                new RenderSpriteSystem(world),
+                new RenderMapSystem(world, _graphics),
+                new RenderSpriteSystem(world, _graphics),
             };
 
             var body = new Box2D.NetStandard.Dynamics.Bodies.BodyDef();
@@ -95,6 +100,10 @@ namespace RogueliteSurvivor
 
         protected override void Update(GameTime gameTime)
         {
+            if(Keyboard.GetState().IsKeyDown(Keys.F))
+            {
+                _graphics.ToggleFullScreen();
+            }
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 Exit();
