@@ -51,7 +51,8 @@ namespace RogueliteSurvivor
             textures = new Dictionary<string, Texture2D>
             {
                 { "tiles", Content.Load<Texture2D>("Tiles") },
-                { "player", Content.Load<Texture2D>("Animated_Mage_Character") }
+                { "player", Content.Load<Texture2D>("Animated_Mage_Character") },
+                { "vampire_bat", Content.Load<Texture2D>("VampireBat") }
             };
 
             world = World.Create();
@@ -59,20 +60,22 @@ namespace RogueliteSurvivor
             player = world.Create(
                 new Player(),
                 new Position() { XY = new Vector2(125, 75) },
-                new Velocity() { Dxy = Vector2.Zero },
+                new Velocity() { Direction = Vector2.Zero },
                 new Speed() { speed = 100f },
-                new Animation(1, 1, .1f),
+                new Animation(1, 1, .1f, 4),
                 new SpriteSheet(textures["player"], "player", 3, 8),
-                new Collider() { Width = 16, Height = 32 }
+                new Collider() { Width = 16, Height = 24, Offset = new Vector2(8, 12) }
             );
 
             updateSystems = new List<IUpdateSystem>
             {
                 new PlayerInputSystem(world),
+                new EnemyAISystem(world),
                 new AnimationSetSystem(world),
                 new AnimationUpdateSystem(world),
                 new CollisionSystem(world),
                 new MoveSystem(world),
+                new EnemySpawnSystem(world, textures),
             };
 
             renderSystems = new List<IRenderSystem>

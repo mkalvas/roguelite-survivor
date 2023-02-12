@@ -19,17 +19,22 @@ namespace RogueliteSurvivor.Systems
         {
         }
 
+        public static Vector2 Offset = new Vector2(125, 75);
+
         public void Render(GameTime gameTime, SpriteBatch spriteBatch, Dictionary<string, Texture2D> textures, Entity player)
         {
-            world.Query(in query, (ref Animation anim, ref SpriteSheet sprite) =>
+            Vector2 playerPosition = player.Get<Position>().XY;
+            world.Query(in query, (ref Position pos, ref Animation anim, ref SpriteSheet sprite) =>
             {
+                Vector2 position = pos.XY - playerPosition + Offset;
+
                 spriteBatch.Draw(
                     textures[sprite.TextureName], 
-                    new Vector2(125, 75), 
+                    position, 
                     sprite.SourceRectangle(anim.CurrentFrame), 
                     Color.White, 
                     0f, 
-                    new Vector2(0, 10), 
+                    new Vector2(0, sprite.Height / 4), 
                     1f, 
                     SpriteEffects.None, 
                     0
