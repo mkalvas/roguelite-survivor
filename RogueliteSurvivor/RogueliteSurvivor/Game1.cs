@@ -13,6 +13,7 @@ using RogueliteSurvivor.Components;
 using RogueliteSurvivor.Systems;
 using Arch.Core.Extensions;
 using RogueliteSurvivor.Physics;
+using JobScheduler;
 
 namespace RogueliteSurvivor
 {
@@ -31,6 +32,7 @@ namespace RogueliteSurvivor
 
         Box2D.NetStandard.Dynamics.World.World physicsWorld;
         System.Numerics.Vector2 gravity = System.Numerics.Vector2.Zero;
+        
 
         private Dictionary<string, Texture2D> textures;
 
@@ -61,21 +63,27 @@ namespace RogueliteSurvivor
             {
                 { "tiles", Content.Load<Texture2D>("Tiles") },
                 { "player", Content.Load<Texture2D>("Animated_Mage_Character") },
-                { "vampire_bat", Content.Load<Texture2D>("VampireBat") }
+                { "vampire_bat", Content.Load<Texture2D>("VampireBat") },
+                { "SmallFireball", Content.Load<Texture2D>("small-fireball") },
+                { "MediumFireball", Content.Load<Texture2D>("medium-fireball") },
+                { "LargeFireball", Content.Load<Texture2D>("large-fireball") }
             };
 
             world = World.Create();
             physicsWorld = new Box2D.NetStandard.Dynamics.World.World(gravity);
-            physicsWorld.SetContactListener(new PlayerContactListener());
+            physicsWorld.SetContactListener(new GameContactListener());
 
             updateSystems = new List<IUpdateSystem>
             {
                 new PlayerInputSystem(world),
+                new TargetingSystem(world),
                 new EnemyAISystem(world),
                 new AnimationSetSystem(world),
                 new AnimationUpdateSystem(world),
                 new CollisionSystem(world, physicsWorld),
                 new EnemySpawnSystem(world, textures, physicsWorld, _graphics),
+                new AttackSystem(world, textures, physicsWorld),
+                new ProjectileCleanupSystem(world, physicsWorld),
             };
 
             renderSystems = new List<IRenderSystem>
@@ -84,11 +92,13 @@ namespace RogueliteSurvivor
                 new RenderSpriteSystem(world, _graphics),
             };
 
+            var mapEntity = world.Create<Map, MapInfo>();
+            mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Demo.tmx"), Content.RootDirectory + "/", physicsWorld, mapEntity));
+
             var body = new Box2D.NetStandard.Dynamics.Bodies.BodyDef();
             body.position = new System.Numerics.Vector2(125, 75);
             body.fixedRotation = true;
             
-            world.Create(new MapInfo(Path.Combine(Content.RootDirectory, "Demo.tmx"), Content.RootDirectory + "/", physicsWorld));
             player = world.Create(
                 new Player(),
                 new Position() { XY = new Vector2(125, 75) },
@@ -96,7 +106,10 @@ namespace RogueliteSurvivor
                 new Speed() { speed = 16000f },
                 new Animation(1, 1, .1f, 4),
                 new SpriteSheet(textures["player"], "player", 3, 8),
-                new Collider(16, 24, physicsWorld, body, 9999)
+                new Collider(16, 24, physicsWorld, body, 9999),
+                new Target(),
+                new Spell() { CurrentSpell = AvailableSpells.SmallFireball },
+                new AttackSpeed() { BaseAttackSpeed = .5f, CurrentAttackSpeed = .5f, Cooldown = 0f }
             );
 
             player.Get<Collider>().SetEntityForPhysics(player);

@@ -21,6 +21,8 @@ namespace RogueliteSurvivor.Systems
         Box2D.NetStandard.Dynamics.World.World physicsWorld;
         GraphicsDeviceManager graphics;
 
+        const int ENEMY_COUNT = 20;
+
         public EnemySpawnSystem(World world, Dictionary<string, Texture2D> textures, Box2D.NetStandard.Dynamics.World.World physicsWorld, GraphicsDeviceManager graphics)
             : base(world, new QueryDescription()
                                 .WithAll<Enemy>())
@@ -64,9 +66,9 @@ namespace RogueliteSurvivor.Systems
                 }
             });
 
-            if(numEnemies < 200)
+            if(numEnemies < ENEMY_COUNT)
             {
-                for(int i = numEnemies; i < 200; i++)
+                for(int i = numEnemies; i < ENEMY_COUNT; i++)
                 {
                     var body = new BodyDef();
                     body.position = getSpawnPosition(player.Value.XY, offset);
@@ -76,10 +78,11 @@ namespace RogueliteSurvivor.Systems
                         new Enemy() { State = EnemyState.Alive },
                         new Position() { XY = new Vector2(body.position.X, body.position.Y) },
                         new Velocity() { Vector = Vector2.Zero },
-                        new Speed() { speed = 8000f },
+                        new Speed() { speed = 2000f },
                         new Animation(0, 3, .1f, 2),
                         new SpriteSheet(textures["vampire_bat"], "vampire_bat", 4, 2),
-                        new Collider(16, 16, physicsWorld, body)
+                        new Collider(16, 16, physicsWorld, body),
+                        new Target()
                     );
 
                     entity.Get<Collider>().SetEntityForPhysics(entity);
@@ -94,7 +97,7 @@ namespace RogueliteSurvivor.Systems
             {
                 x = random.Next(64, 736);
                 y = random.Next(64, 736);
-            } while ((x > (playerPosition.X - offset.X) && x < (playerPosition.X + offset.X)) || (y > (playerPosition.Y - offset.Y) && y < (playerPosition.Y + offset.Y)));
+            } while ((x > (playerPosition.X - offset.X) && x < (playerPosition.X + offset.X)) && (y > (playerPosition.Y - offset.Y) && y < (playerPosition.Y + offset.Y)));
 
             return new System.Numerics.Vector2(x, y);
         }

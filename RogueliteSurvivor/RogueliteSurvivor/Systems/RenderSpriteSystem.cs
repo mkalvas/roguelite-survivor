@@ -28,11 +28,17 @@ namespace RogueliteSurvivor.Systems
             world.Query(in query, (in Entity entity, ref Position pos, ref Animation anim, ref SpriteSheet sprite) =>
             {
                 Vector2 position = pos.XY - playerPosition;
+                
                 bool alive = true;
                 if(entity.TryGet(out Enemy enemy))
                 {
                     alive = enemy.State == EnemyState.Alive;
                 }
+                else if(entity.TryGet(out Projectile projectile)) 
+                {
+                    alive = projectile.State == ProjectileState.Alive;
+                }
+
                 if (alive && MathF.Abs(position.X) < offset.X && MathF.Abs(position.Y) < offset.Y)
                 {
                     spriteBatch.Draw(
@@ -40,9 +46,9 @@ namespace RogueliteSurvivor.Systems
                         position + offset,
                         sprite.SourceRectangle(anim.CurrentFrame),
                         Color.White,
-                        0f,
+                        sprite.Rotation,
                         new Vector2(sprite.Width / 2, sprite.Height / 2),
-                        1f,
+                        sprite.Scale,
                         SpriteEffects.None,
                         0
                     );
