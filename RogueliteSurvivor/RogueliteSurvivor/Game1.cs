@@ -35,6 +35,7 @@ namespace RogueliteSurvivor
         
 
         private Dictionary<string, Texture2D> textures;
+        private Dictionary<string, SpriteFont> fonts;
 
         public Game1()
         {
@@ -66,7 +67,14 @@ namespace RogueliteSurvivor
                 { "vampire_bat", Content.Load<Texture2D>("VampireBat") },
                 { "SmallFireball", Content.Load<Texture2D>("small-fireball") },
                 { "MediumFireball", Content.Load<Texture2D>("medium-fireball") },
-                { "LargeFireball", Content.Load<Texture2D>("large-fireball") }
+                { "LargeFireball", Content.Load<Texture2D>("large-fireball") },
+                { "StatBar", Content.Load<Texture2D>("StatBar") },
+                { "HealthBar", Content.Load<Texture2D>("HealthBar") }
+            };
+
+            fonts = new Dictionary<string, SpriteFont>()
+            {
+                { "Font", Content.Load<SpriteFont>("Font") },
             };
 
             world = World.Create();
@@ -90,18 +98,19 @@ namespace RogueliteSurvivor
             {
                 new RenderMapSystem(world, _graphics),
                 new RenderSpriteSystem(world, _graphics),
+                new RenderHudSystem(world, _graphics, fonts),
             };
 
             var mapEntity = world.Create<Map, MapInfo>();
             mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Demo.tmx"), Content.RootDirectory + "/", physicsWorld, mapEntity));
 
             var body = new Box2D.NetStandard.Dynamics.Bodies.BodyDef();
-            body.position = new System.Numerics.Vector2(125, 75);
+            body.position = new System.Numerics.Vector2(384, 384);
             body.fixedRotation = true;
             
             player = world.Create(
                 new Player(),
-                new Position() { XY = new Vector2(125, 75) },
+                new Position() { XY = new Vector2(384, 384) },
                 new Velocity() { Vector = Vector2.Zero },
                 new Speed() { speed = 16000f },
                 new Animation(1, 1, .1f, 4),
@@ -110,7 +119,8 @@ namespace RogueliteSurvivor
                 new Target(),
                 new Spell() { CurrentSpell = AvailableSpells.SmallFireball },
                 new AttackSpeed() { BaseAttackSpeed = .5f, CurrentAttackSpeed = .5f, Cooldown = 0f },
-                new Health() { Current = 100, Max = 100 }
+                new Health() { Current = 100, Max = 100 },
+                new KillCount() { Count = 0 }
             );
 
             player.Get<Collider>().SetEntityForPhysics(player);
@@ -139,7 +149,7 @@ namespace RogueliteSurvivor
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: transformMatrix);
 
