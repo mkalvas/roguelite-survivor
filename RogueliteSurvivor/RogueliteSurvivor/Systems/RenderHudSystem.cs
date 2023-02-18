@@ -24,9 +24,10 @@ namespace RogueliteSurvivor.Systems
         }
 
         static Vector2 HealthLocation = new Vector2(10, 10);
+        static Vector2 TimeLocation = new Vector2(-100, 10);
         const int Increment = 64;
 
-        public void Render(GameTime gameTime, SpriteBatch spriteBatch, Dictionary<string, Texture2D> textures, Entity player)
+        public void Render(GameTime gameTime, SpriteBatch spriteBatch, Dictionary<string, Texture2D> textures, Entity player, float totalElapsedTime)
         {
             int counter = 0;
             world.Query(in query, (ref Health health, ref KillCount killCount) =>
@@ -71,6 +72,13 @@ namespace RogueliteSurvivor.Systems
 
                 counter++;
             });
+
+            spriteBatch.DrawString(
+                    fonts["Font"],
+                    string.Concat("Time: ", float.Round(totalElapsedTime, 2)),
+                    TimeLocation + Vector2.UnitX * (graphics.PreferredBackBufferWidth / 3),
+                    Color.White
+                );
         }
     }
 }

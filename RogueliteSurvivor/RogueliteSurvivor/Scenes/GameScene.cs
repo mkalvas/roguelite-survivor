@@ -28,6 +28,8 @@ namespace RogueliteSurvivor.Scenes
         private Dictionary<string, Texture2D> textures;
         private Dictionary<string, SpriteFont> fonts;
 
+        private float totalGameTime = 0f;
+
         public GameScene(SpriteBatch spriteBatch, ContentManager contentManager, GraphicsDeviceManager graphics, World world, Box2D.NetStandard.Dynamics.World.World physicsWorld)
             : base(spriteBatch, contentManager, graphics, world, physicsWorld)
         {
@@ -37,19 +39,22 @@ namespace RogueliteSurvivor.Scenes
         {
             textures = new Dictionary<string, Texture2D>
             {
-                { "tiles", Content.Load<Texture2D>("Tiles") },
-                { "player", Content.Load<Texture2D>("Animated_Mage_Character") },
-                { "vampire_bat", Content.Load<Texture2D>("VampireBat") },
-                { "SmallFireball", Content.Load<Texture2D>("small-fireball") },
-                { "MediumFireball", Content.Load<Texture2D>("medium-fireball") },
-                { "LargeFireball", Content.Load<Texture2D>("large-fireball") },
-                { "StatBar", Content.Load<Texture2D>("StatBar") },
-                { "HealthBar", Content.Load<Texture2D>("HealthBar") }
+                { "tiles", Content.Load<Texture2D>(Path.Combine("Maps", "Tiles")) },
+                { "player", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character")) },
+                { "VampireBat", Content.Load<Texture2D>(Path.Combine("Enemies", "VampireBat")) },
+                { "GhastlyBeholder", Content.Load<Texture2D>(Path.Combine("Enemies", "GhastlyBeholderIdleSide")) },
+                { "GraveRevenant", Content.Load<Texture2D>(Path.Combine("Enemies", "GraveRevenantIdleSide")) },
+                { "BloodLich", Content.Load<Texture2D>(Path.Combine("Enemies", "BloodLichIdleSIde")) },
+                { "SmallFireball", Content.Load<Texture2D>(Path.Combine("Spells", "small-fireball")) },
+                { "MediumFireball", Content.Load<Texture2D>(Path.Combine("Spells", "medium-fireball")) },
+                { "LargeFireball", Content.Load<Texture2D>(Path.Combine("Spells", "large-fireball")) },
+                { "StatBar", Content.Load<Texture2D>(Path.Combine("Hud", "StatBar")) },
+                { "HealthBar", Content.Load<Texture2D>(Path.Combine("Hud", "HealthBar")) }
             };
 
             fonts = new Dictionary<string, SpriteFont>()
             {
-                { "Font", Content.Load<SpriteFont>("Font") },
+                { "Font", Content.Load<SpriteFont>(Path.Combine("Fonts", "Font")) },
             };
 
             if(world.CountEntities(new QueryDescription()) > 0)
@@ -94,7 +99,7 @@ namespace RogueliteSurvivor.Scenes
             };
 
             var mapEntity = world.Create<Map, MapInfo>();
-            mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Demo.tmx"), Content.RootDirectory + "/", physicsWorld, mapEntity));
+            mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Maps", "Demo.tmx"), Path.Combine(Content.RootDirectory, "Maps"), physicsWorld, mapEntity));
 
             var body = new Box2D.NetStandard.Dynamics.Bodies.BodyDef();
             body.position = new System.Numerics.Vector2(384, 384);
@@ -117,6 +122,8 @@ namespace RogueliteSurvivor.Scenes
                 BodyFactory.CreateCircularBody(player, 16, physicsWorld, body, 9999)
             );
 
+            totalGameTime = 0;
+
             Task.Delay(3000);
 
             Loaded = true;
@@ -138,9 +145,11 @@ namespace RogueliteSurvivor.Scenes
             }
             else
             {
+                totalGameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
                 foreach (var system in updateSystems)
                 {
-                    system.Update(gameTime);
+                    system.Update(gameTime, totalGameTime);
                 }
             }
 
@@ -151,7 +160,7 @@ namespace RogueliteSurvivor.Scenes
         {
             foreach (var system in renderSystems)
             {
-                system.Render(gameTime, _spriteBatch, textures, player);
+                system.Render(gameTime, _spriteBatch, textures, player, totalGameTime);
             }
         }
     }

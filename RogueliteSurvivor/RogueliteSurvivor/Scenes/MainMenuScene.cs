@@ -7,6 +7,7 @@ using RogueliteSurvivor.Components;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace RogueliteSurvivor.Scenes
         {
             fonts = new Dictionary<string, SpriteFont>()
             {
-                { "Font", Content.Load<SpriteFont>("Font") },
+                { "Font", Content.Load<SpriteFont>(Path.Combine("Fonts", "Font")) },
             };
 
             Loaded = true;
@@ -43,7 +44,7 @@ namespace RogueliteSurvivor.Scenes
             if (!readyForInput)
             {
                 counter += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (counter > 1f)
+                if (counter > 0.5f)
                 {
                     counter = 0f;
                     readyForInput = true;
