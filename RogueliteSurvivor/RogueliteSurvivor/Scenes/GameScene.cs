@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RogueliteSurvivor.Components;
+using RogueliteSurvivor.Constants;
 using RogueliteSurvivor.Physics;
 using RogueliteSurvivor.Systems;
 using System;
@@ -19,19 +20,16 @@ namespace RogueliteSurvivor.Scenes
 {
     public class GameScene : Scene
     {
-        private World world;
+        
         private List<IUpdateSystem> updateSystems;
         private List<IRenderSystem> renderSystems;
         private Entity player;
 
-        Box2D.NetStandard.Dynamics.World.World physicsWorld;
-        System.Numerics.Vector2 gravity = System.Numerics.Vector2.Zero;
-
         private Dictionary<string, Texture2D> textures;
         private Dictionary<string, SpriteFont> fonts;
 
-        public GameScene(SpriteBatch spriteBatch, ContentManager contentManager, GraphicsDeviceManager graphics) 
-            : base(spriteBatch, contentManager, graphics)
+        public GameScene(SpriteBatch spriteBatch, ContentManager contentManager, GraphicsDeviceManager graphics, World world, Box2D.NetStandard.Dynamics.World.World physicsWorld)
+            : base(spriteBatch, contentManager, graphics, world, physicsWorld)
         {
         }
 
@@ -54,9 +52,26 @@ namespace RogueliteSurvivor.Scenes
                 { "Font", Content.Load<SpriteFont>("Font") },
             };
 
-            world = World.Create();
-            physicsWorld = new Box2D.NetStandard.Dynamics.World.World(gravity);
-            physicsWorld.SetContactListener(new GameContactListener());
+            if(world.CountEntities(new QueryDescription()) > 0)
+            {
+                List<Entity> entities = new List<Entity>();
+                world.GetEntities(new QueryDescription(), entities);
+                foreach(var entity in entities)
+                {
+                    world.Destroy(entity);
+                }
+            }
+
+            if(physicsWorld.GetBodyCount() > 0)
+            {
+                var physicsBody = physicsWorld.GetBodyList();
+                while(physicsBody != null) 
+                {
+                    var nextPhysicsBody = physicsBody.GetNext();
+                    physicsWorld.DestroyBody(physicsBody);
+                    physicsBody = nextPhysicsBody;
+                };
+            }
 
             updateSystems = new List<IUpdateSystem>
             {
@@ -88,7 +103,7 @@ namespace RogueliteSurvivor.Scenes
             player = world.Create<Player, Position, Velocity, Speed, Animation, SpriteSheet, Target, Spell, AttackSpeed, Health, KillCount, Body>();
 
             player.SetRange(
-                new Player(),
+                new Player() { State = EntityState.Alive },
                 new Position() { XY = new Vector2(384, 384) },
                 new Velocity() { Vector = Vector2.Zero },
                 new Speed() { speed = 16000f },
@@ -113,7 +128,13 @@ namespace RogueliteSurvivor.Scenes
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
+                Loaded = false;
                 retVal = "main-menu";
+            }
+            else if(player.Get<Player>().State == EntityState.Dead)
+            {
+                Loaded = false;
+                retVal = "game-over";
             }
             else
             {
