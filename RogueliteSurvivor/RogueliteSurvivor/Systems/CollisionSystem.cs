@@ -27,6 +27,10 @@ namespace RogueliteSurvivor.Systems
         {
             world.Query(in query, (in Entity entity, ref Position pos, ref Velocity vel, ref Body body) =>
             {
+                if(float.IsNaN(vel.VectorPhysics.X) || float.IsNaN(vel.VectorPhysics.X))
+                {
+                    vel.Vector = Vector2.Zero;
+                }
                 body.SetLinearVelocity(vel.VectorPhysics);
             });
 
@@ -37,6 +41,8 @@ namespace RogueliteSurvivor.Systems
                 var position = body.GetPosition();
                 pos.XY = new Vector2(position.X, position.Y);
             });
+
+            physicsWorld.ClearForces();
         }
     }
 }

@@ -49,7 +49,8 @@ namespace RogueliteSurvivor.Scenes
                 { "MediumFireball", Content.Load<Texture2D>(Path.Combine("Spells", "medium-fireball")) },
                 { "LargeFireball", Content.Load<Texture2D>(Path.Combine("Spells", "large-fireball")) },
                 { "StatBar", Content.Load<Texture2D>(Path.Combine("Hud", "StatBar")) },
-                { "HealthBar", Content.Load<Texture2D>(Path.Combine("Hud", "HealthBar")) }
+                { "HealthBar", Content.Load<Texture2D>(Path.Combine("Hud", "HealthBar")) },
+                { "pickups", Content.Load<Texture2D>(Path.Combine("Pickups", "player-pickups")) }
             };
 
             fonts = new Dictionary<string, SpriteFont>()
@@ -86,6 +87,7 @@ namespace RogueliteSurvivor.Scenes
                 new AnimationSetSystem(world),
                 new AnimationUpdateSystem(world),
                 new CollisionSystem(world, physicsWorld),
+                new PickupSystem(world),
                 new EnemySpawnSystem(world, textures, physicsWorld, _graphics),
                 new AttackSystem(world, textures, physicsWorld),
                 new ProjectileCleanupSystem(world, physicsWorld),
@@ -95,6 +97,7 @@ namespace RogueliteSurvivor.Scenes
             {
                 new RenderMapSystem(world, _graphics),
                 new RenderSpriteSystem(world, _graphics),
+                new RenderPickupSystem(world, _graphics),
                 new RenderHudSystem(world, _graphics, fonts),
             };
 
@@ -115,8 +118,8 @@ namespace RogueliteSurvivor.Scenes
                 new Animation(1, 1, .1f, 4),
                 new SpriteSheet(textures["player"], "player", 3, 8),
                 new Target(),
-                new Spell() { CurrentSpell = AvailableSpells.SmallFireball },
-                new AttackSpeed() { BaseAttackSpeed = .5f, CurrentAttackSpeed = .5f, Cooldown = 0f },
+                new Spell() { CurrentSpell = AvailableSpells.SmallFireball, CurrentDamage = 5, BaseDamage = 5 },
+                new AttackSpeed() { BaseAttacksPerSecond = 2f, CurrentAttacksPerSecond = 2f, Cooldown = 0f },
                 new Health() { Current = 100, Max = 100 },
                 new KillCount() { Count = 0 },
                 BodyFactory.CreateCircularBody(player, 16, physicsWorld, body, 9999)
