@@ -122,6 +122,30 @@
 /processorParam:TextureFormat=Color
 /build:Pickups/player-pickups.png
 
+#begin Player/Animated_Mage_Character_blue.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Player/Animated_Mage_Character_blue.png
+
+#begin Player/Animated_Mage_Character_yellow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Player/Animated_Mage_Character_yellow.png
+
 #begin Player/Animated_Mage_Character.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -134,6 +158,18 @@
 /processorParam:TextureFormat=Color
 /build:Player/Animated_Mage_Character.png
 
+#begin Spells/ice-shard.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Spells/ice-shard.png
+
 #begin Spells/large-fireball.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -145,6 +181,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Spells/large-fireball.png
+
+#begin Spells/lightning-blast.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Spells/lightning-blast.png
 
 #begin Spells/medium-fireball.png
 /importer:TextureImporter

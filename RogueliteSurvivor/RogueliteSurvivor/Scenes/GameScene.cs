@@ -5,10 +5,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using RogueliteSurvivor.ComponentFactories;
 using RogueliteSurvivor.Components;
 using RogueliteSurvivor.Constants;
 using RogueliteSurvivor.Physics;
 using RogueliteSurvivor.Systems;
+using RogueliteSurvivor.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,10 +34,16 @@ namespace RogueliteSurvivor.Scenes
 
         private GameState gameState;
         private float stateChangeTime = .11f;
+        private GameSettings gameSettings;
 
         public GameScene(SpriteBatch spriteBatch, ContentManager contentManager, GraphicsDeviceManager graphics, World world, Box2D.NetStandard.Dynamics.World.World physicsWorld)
             : base(spriteBatch, contentManager, graphics, world, physicsWorld)
         {
+        }
+
+        public void SetGameSettings(GameSettings gameSettings)
+        {
+            this.gameSettings = gameSettings;
         }
 
         public override void LoadContent()
@@ -44,6 +52,8 @@ namespace RogueliteSurvivor.Scenes
             {
                 { "tiles", Content.Load<Texture2D>(Path.Combine("Maps", "Tiles")) },
                 { "player", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character")) },
+                { "player_blue", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character_blue")) },
+                { "player_yellow", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character_yellow")) },
                 { "VampireBat", Content.Load<Texture2D>(Path.Combine("Enemies", "VampireBat")) },
                 { "GhastlyBeholder", Content.Load<Texture2D>(Path.Combine("Enemies", "GhastlyBeholderIdleSide")) },
                 { "GraveRevenant", Content.Load<Texture2D>(Path.Combine("Enemies", "GraveRevenantIdleSide")) },
@@ -51,6 +61,8 @@ namespace RogueliteSurvivor.Scenes
                 { "SmallFireball", Content.Load<Texture2D>(Path.Combine("Spells", "small-fireball")) },
                 { "MediumFireball", Content.Load<Texture2D>(Path.Combine("Spells", "medium-fireball")) },
                 { "LargeFireball", Content.Load<Texture2D>(Path.Combine("Spells", "large-fireball")) },
+                { "IceShard", Content.Load<Texture2D>(Path.Combine("Spells", "ice-shard")) },
+                { "LightningBlast", Content.Load<Texture2D>(Path.Combine("Spells", "lightning-blast")) },
                 { "StatBar", Content.Load<Texture2D>(Path.Combine("Hud", "StatBar")) },
                 { "HealthBar", Content.Load<Texture2D>(Path.Combine("Hud", "HealthBar")) },
                 { "pickups", Content.Load<Texture2D>(Path.Combine("Pickups", "player-pickups")) }
@@ -119,13 +131,13 @@ namespace RogueliteSurvivor.Scenes
                 new Velocity() { Vector = Vector2.Zero },
                 new Speed() { speed = 16000f },
                 new Animation(1, 1, .1f, 4),
-                new SpriteSheet(textures["player"], "player", 3, 8),
+                new SpriteSheet(textures[gameSettings.PlayerTexture], gameSettings.PlayerTexture, 3, 8),
                 new Target(),
-                new Spell() { CurrentSpell = AvailableSpells.SmallFireball, CurrentDamage = 5, BaseDamage = 5 },
+                SpellFactory.CreateSpell(gameSettings.StartingSpell),
                 new AttackSpeed() { BaseAttacksPerSecond = 2f, CurrentAttacksPerSecond = 2f, Cooldown = 0f },
                 new Health() { Current = 100, Max = 100 },
                 new KillCount() { Count = 0 },
-                BodyFactory.CreateCircularBody(player, 16, physicsWorld, body, 9999)
+                BodyFactory.CreateCircularBody(player, 16, physicsWorld, body, 99)
             );
 
             totalGameTime = 0;

@@ -11,6 +11,8 @@ namespace RogueliteSurvivor.Components
         SmallFireball,
         MediumFireball,
         LargeFireball,
+        IceShard,
+        LightningBlast,
     }
 
     public struct Spell
@@ -18,5 +20,7 @@ namespace RogueliteSurvivor.Components
         public AvailableSpells CurrentSpell { get; set; } 
         public int BaseDamage { get; set; }
         public int CurrentDamage { get; set; }
+        public float BaseProjectileSpeed { get; set; }
+        public float CurrentProjectileSpeed { get; set; }
     }
 }
