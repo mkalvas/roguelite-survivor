@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Constants
 {
-    public enum EntityState
+    public enum Spells
     {
-        Alive,
-        ReadyToDie,
-        Dying,
-        Dead,
+        Fireball,
+        IceShard,
+        LightningBlast,
     }
 }
