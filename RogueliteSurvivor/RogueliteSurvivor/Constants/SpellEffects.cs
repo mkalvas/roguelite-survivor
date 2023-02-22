@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Constants
 {
-    public enum Spells
+    public enum SpellEffects
     {
-        Fireball,
-        IceShard,
-        LightningBlast,
-        EnemyMelee,
+        None,
+        Burn,
+        Shock,
+        Slow,
     }
 }

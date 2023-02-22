@@ -44,7 +44,7 @@ namespace RogueliteSurvivor.Systems
                     switch(sprite.Type)
                     {
                         case PickupType.AttackSpeed:
-                            var attackSpeed = player.Value.Get<AttackSpeed>();
+                            var attackSpeed = player.Value.Get<Spell>();
                             attackSpeed.CurrentAttacksPerSecond += sprite.PickupAmount * attackSpeed.BaseAttacksPerSecond;
                             player.Value.Set(attackSpeed);
                             world.Destroy(entity);
@@ -53,6 +53,12 @@ namespace RogueliteSurvivor.Systems
                             var spell = player.Value.Get<Spell>();
                             spell.CurrentDamage += sprite.PickupAmount * spell.BaseDamage;
                             player.Value.Set(spell);
+                            world.Destroy(entity);
+                            break;
+                        case PickupType.SpellEffectChance:
+                            var spellEffect = player.Value.Get<Spell>();
+                            spellEffect.CurrentEffectChance += sprite.PickupAmount * spellEffect.BaseEffectChance;
+                            player.Value.Set(spellEffect);
                             world.Destroy(entity);
                             break;
                         case PickupType.MoveSpeed:

@@ -112,6 +112,33 @@ namespace RogueliteSurvivor.Physics
                     Animation anim = entity.Get<Animation>();
                     anim.Overlay = Microsoft.Xna.Framework.Color.Red;
                     entity.SetRange(health, anim);
+                    if(damage.SpellEffect != SpellEffects.None)
+                    {
+                        switch(damage.SpellEffect)
+                        {
+                            case SpellEffects.Burn:
+                                if (!entity.Has<Burn>())
+                                {
+                                    entity.Add<Burn>();
+                                }
+                                entity.Set(new Burn() { TimeLeft = 5f, TickRate = .5f, NextTick = .5f });
+                                break;
+                            case SpellEffects.Slow:
+                                if (!entity.Has<Slow>())
+                                {
+                                    entity.Add<Slow>();
+                                }
+                                entity.Set(new Slow() { TimeLeft = 5f });
+                                break;
+                            case SpellEffects.Shock:
+                                if (!entity.Has<Shock>())
+                                {
+                                    entity.Add<Shock>();
+                                }
+                                entity.Set(new Shock() { TimeLeft = 1f });
+                                break;
+                        }
+                    }
                 }
             }
         }
@@ -139,8 +166,8 @@ namespace RogueliteSurvivor.Physics
         }
 
         private void setPlayerHealthAndState(Entity entity, Entity other, Player player)
-        {
-            AttackSpeed attackSpeed = other.Get<AttackSpeed>();
+        {   
+            Spell attackSpeed = other.Get<Spell>();
             if(attackSpeed.Cooldown > attackSpeed.CurrentAttackSpeed)
             {
                 attackSpeed.Cooldown -= attackSpeed.CurrentAttackSpeed;
