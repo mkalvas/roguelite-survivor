@@ -141,7 +141,7 @@ namespace RogueliteSurvivor.Scenes
             var mapEntity = world.Create<Map, MapInfo>();
             mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Maps", "Demo.tmx"), Path.Combine(Content.RootDirectory, "Maps"), physicsWorld, mapEntity));
 
-            var body = new Box2D.NetStandard.Dynamics.Bodies.BodyDef();
+            var body = new BodyDef();
             body.position = new System.Numerics.Vector2(384, 384) / PhysicsConstants.PhysicsToPixelsRatio;
             body.fixedRotation = true;
 
@@ -164,6 +164,7 @@ namespace RogueliteSurvivor.Scenes
 
             totalGameTime = 0;
             gameState = GameState.Running;
+
             Loaded = true;
         }
 
@@ -203,11 +204,17 @@ namespace RogueliteSurvivor.Scenes
             return retVal;
         }
 
-        public override void Draw(GameTime gameTime, params object[] values)
+        public override void Draw(GameTime gameTime, Matrix transformMatrix, params object[] values)
         {
-            foreach (var system in renderSystems)
+            for (int layer = 1; layer < 3; layer++)
             {
-                system.Render(gameTime, _spriteBatch, textures, player, totalGameTime, gameState);
+                foreach (var system in renderSystems)
+                {
+                    _spriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend, transformMatrix: transformMatrix);
+                    system.Render(gameTime, _spriteBatch, textures, player, totalGameTime, gameState, layer);
+                    _spriteBatch.End();
+
+                }
             }
         }
     }
