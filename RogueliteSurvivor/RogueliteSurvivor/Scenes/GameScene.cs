@@ -64,6 +64,9 @@ namespace RogueliteSurvivor.Scenes
                 { "Fireball", Content.Load<Texture2D>(Path.Combine("Spells", "fireball")) },
                 { "IceShard", Content.Load<Texture2D>(Path.Combine("Spells", "ice-shard")) },
                 { "LightningBlast", Content.Load<Texture2D>(Path.Combine("Spells", "lightning-blast")) },
+                { "FireExplosion", Content.Load<Texture2D>(Path.Combine("Spells", "fire-explosion")) },
+                { "IceSpikes", Content.Load<Texture2D>(Path.Combine("Spells", "ice-spikes")) },
+                { "LightningStrike", Content.Load<Texture2D>(Path.Combine("Spells", "lightning-strike")) },
 
                 { "StatBar", Content.Load<Texture2D>(Path.Combine("Hud", "StatBar")) },
                 { "HealthBar", Content.Load<Texture2D>(Path.Combine("Hud", "HealthBar")) },
@@ -127,7 +130,7 @@ namespace RogueliteSurvivor.Scenes
                 new PickupSystem(world),
                 new EnemySpawnSystem(world, textures, physicsWorld, _graphics),
                 new AttackSystem(world, textures, physicsWorld),
-                new ProjectileCleanupSystem(world, physicsWorld),
+                new AttackSpellCleanupSystem(world),
                 new DeathSystem(world, textures, physicsWorld),
             };
 
@@ -146,7 +149,7 @@ namespace RogueliteSurvivor.Scenes
             body.position = new System.Numerics.Vector2(384, 384) / PhysicsConstants.PhysicsToPixelsRatio;
             body.fixedRotation = true;
 
-            player = world.Create<Player, Position, Velocity, Speed, Animation, SpriteSheet, Target, Spell, Health, KillCount, Body>();
+            player = world.Create<Player, Position, Velocity, Speed, Animation, SpriteSheet, Target, Spell1, Spell2, Health, KillCount, Body>();
 
             player.SetRange(
                 new Player() { State = EntityState.Alive },
@@ -156,7 +159,8 @@ namespace RogueliteSurvivor.Scenes
                 new Animation(1, 1, .1f, 4),
                 new SpriteSheet(textures[gameSettings.PlayerTexture], gameSettings.PlayerTexture, 3, 8),
                 new Target(),
-                SpellFactory.CreateSpell(gameSettings.StartingSpell),
+                SpellFactory.CreateSpell<Spell1>(gameSettings.StartingSpell),
+                SpellFactory.CreateSpell<Spell2>(gameSettings.SecondarySpell),
                 new Health() { Current = 100, Max = 100 },
                 new KillCount() { Count = 0 },
                 BodyFactory.CreateCircularBody(player, 16, physicsWorld, body, 99)

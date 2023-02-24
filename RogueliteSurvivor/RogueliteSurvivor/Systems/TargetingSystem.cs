@@ -26,12 +26,15 @@ namespace RogueliteSurvivor.Systems
         {
             world.Query(in query, (in Entity entity, ref Position pos, ref Target target) =>
             {
-                Entity? targetEntity = findTarget(entity.Has<Enemy>() ? playerQuery : enemyQuery, pos.XY);
-
-                if(targetEntity.HasValue)
+                if (entity.IsAlive())
                 {
-                    target.Entity = targetEntity.Value;
-                }                
+                    Entity? targetEntity = findTarget(entity.Has<Enemy>() ? playerQuery : enemyQuery, pos.XY);
+
+                    if (targetEntity.HasValue)
+                    {
+                        target.Entity = targetEntity.Value;
+                    }
+                }
             });
         }
 
@@ -41,7 +44,7 @@ namespace RogueliteSurvivor.Systems
             Vector2 targetPos = new Vector2(9999, 9999);
             world.Query(in targetQuery, (in Entity other, ref Position otherPos) =>
             {
-                if (!other.Has<Enemy>() || other.Get<Enemy>().State != Constants.EntityState.Dead)
+                if (other.IsAlive() && (!other.Has<Enemy>() || other.Get<Enemy>().State != Constants.EntityState.Dead))
                 {
                     if (!target.HasValue)
                     {
