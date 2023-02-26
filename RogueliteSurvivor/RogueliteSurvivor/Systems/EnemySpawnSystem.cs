@@ -12,9 +12,6 @@ using RogueliteSurvivor.Physics;
 using RogueliteSurvivor.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Systems
 {
@@ -34,11 +31,12 @@ namespace RogueliteSurvivor.Systems
         int enemyCount = 20;
         int difficulty = 1;
         int increaseAfterSeconds = 15;
+        int lastSet = 0;
 
         public EnemySpawnSystem(World world, Dictionary<string, Texture2D> textures, Box2D.NetStandard.Dynamics.World.World physicsWorld, GraphicsDeviceManager graphics, Dictionary<string, EnemyContainer> enemyContainers, Dictionary<Spells, SpellContainer> spellContainers)
             : base(world, new QueryDescription()
                                 .WithAll<Enemy>())
-        { 
+        {
             this.textures = textures;
             this.physicsWorld = physicsWorld;
             this.graphics = graphics;
@@ -49,13 +47,13 @@ namespace RogueliteSurvivor.Systems
             setDifficulty(0);
         }
 
-        public void Update(GameTime gameTime, float totalElapsedTime) 
+        public void Update(GameTime gameTime, float totalElapsedTime)
         {
             int numEnemies = 0;
 
-            if(((int)totalElapsedTime) % increaseAfterSeconds == 0)
+            if (((int)totalElapsedTime) % increaseAfterSeconds == 0 && lastSet != (int)totalElapsedTime)
             {
-                setDifficulty((int) totalElapsedTime);
+                setDifficulty((int)totalElapsedTime);
             }
 
             Vector2 offset = new Vector2(graphics.PreferredBackBufferWidth / 6, graphics.PreferredBackBufferHeight / 6);
@@ -68,16 +66,17 @@ namespace RogueliteSurvivor.Systems
                 }
             });
 
-            world.Query(in query, (in Entity entity, ref Enemy enemy, ref Pickup pickup, ref Position position) =>
+            world.Query(in query, (in Entity entity, ref Enemy enemy, ref Pickup pickup, ref Position position, ref EntityStatus entityStatus) =>
             {
-                if(enemy.State == EntityState.Dead)
+                if (entityStatus.State == State.Dead)
                 {
-                    if (pickup.Type != PickupType.None)
-                    {
-                        createPickup(pickup, position);
-                    }
                     if (entity.IsAlive())
                     {
+                        if (pickup.Type != PickupType.None)
+                        {
+                            createPickup(pickup, position);
+                        }
+
                         world.TryDestroy(entity);
                     }
                 }
@@ -87,9 +86,9 @@ namespace RogueliteSurvivor.Systems
                 }
             });
 
-            if(numEnemies < enemyCount)
+            if (numEnemies < enemyCount)
             {
-                for(int i = numEnemies; i < enemyCount; i++)
+                for (int i = numEnemies; i < enemyCount; i++)
                 {
                     createEnemy(player, offset);
                 }
@@ -107,9 +106,10 @@ namespace RogueliteSurvivor.Systems
 
             return new System.Numerics.Vector2(x, y);
         }
-    
+
         private void setDifficulty(int time)
         {
+            lastSet = time;
             difficulty = (time / increaseAfterSeconds) + 1;
 
             enemyCount = 20 * difficulty;
@@ -128,7 +128,7 @@ namespace RogueliteSurvivor.Systems
                 .Add(PickupType.Health, difficulty)
                 .Add(PickupType.SpellEffectChance, difficulty);
         }
-    
+
         private void createEnemy(Position? player, Vector2 offset)
         {
             createEnemyFromContainer(enemyTable.Roll(random), player, offset);
@@ -140,14 +140,15 @@ namespace RogueliteSurvivor.Systems
             {
                 EnemyContainer container = enemyContainers[enemyType];
 
-                var entity = world.Create<Enemy, Position, Velocity, Speed, Animation, SpriteSheet, Target, Health, Damage, Spell1, Body, Pickup>();
+                var entity = world.Create<Enemy, EntityStatus, Position, Velocity, Speed, Animation, SpriteSheet, Target, Health, Damage, Spell1, Body, Pickup>();
 
                 var body = new BodyDef();
                 body.position = getSpawnPosition(player.Value.XY, offset) / PhysicsConstants.PhysicsToPixelsRatio;
                 body.fixedRotation = true;
 
                 entity.SetRange(
-                            new Enemy() { State = EntityState.Alive },
+                            new Enemy(),
+                            new EntityStatus(),
                             new Position() { XY = new Vector2(body.position.X, body.position.Y) },
                             new Velocity() { Vector = Vector2.Zero },
                             new Speed() { speed = container.Speed },
@@ -192,7 +193,7 @@ namespace RogueliteSurvivor.Systems
         private void createPickup(Pickup pickup, Position position)
         {
             var entity = world.Create<PickupSprite, Position>();
-            
+
             entity.SetRange(new PickupSprite() { Type = pickup.Type, PickupAmount = pickup.PickupAmount },
                 new Position() { XY = new Vector2(position.XY.X, position.XY.Y) }
             );

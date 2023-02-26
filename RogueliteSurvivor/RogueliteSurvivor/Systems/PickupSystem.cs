@@ -1,17 +1,9 @@
 ﻿using Arch.Core;
 using Arch.Core.Extensions;
-using Box2D.NetStandard.Dynamics.Bodies;
 using Microsoft.Xna.Framework;
 using RogueliteSurvivor.Components;
 using RogueliteSurvivor.Constants;
 using RogueliteSurvivor.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using TiledCS;
 
 namespace RogueliteSurvivor.Systems
 {
@@ -40,9 +32,9 @@ namespace RogueliteSurvivor.Systems
 
             world.Query(in query, (in Entity entity, ref PickupSprite sprite, ref Position pos) =>
             {
-                if(Vector2.Distance(playerPos.Value.XY, pos.XY) < 16)
+                if (Vector2.Distance(playerPos.Value.XY, pos.XY) < 16)
                 {
-                    switch(sprite.Type)
+                    switch (sprite.Type)
                     {
                         case PickupType.AttackSpeed:
                             processAttackSpeed(entity, player, sprite);
@@ -61,7 +53,7 @@ namespace RogueliteSurvivor.Systems
                             break;
                         case PickupType.Health:
                             var health = player.Value.Get<Health>();
-                            if(health.Current < health.Max)
+                            if (health.Current < health.Max)
                             {
                                 health.Current = int.Min(health.Max, (int)sprite.PickupAmount + health.Current);
                                 player.Value.Set(health);
@@ -73,12 +65,12 @@ namespace RogueliteSurvivor.Systems
                 else
                 {
                     sprite.Count += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    if(sprite.Count > sprite.MaxCount)
+                    if (sprite.Count > sprite.MaxCount)
                     {
                         sprite.Count = 0;
                         sprite.Current += sprite.Increment;
 
-                        if(sprite.Current == sprite.Max || sprite.Current == sprite.Min)
+                        if (sprite.Current == sprite.Max || sprite.Current == sprite.Min)
                         {
                             sprite.Increment *= -1;
                         }
@@ -89,46 +81,61 @@ namespace RogueliteSurvivor.Systems
 
         private void processAttackSpeed(Entity entity, Entity? player, PickupSprite sprite)
         {
+            AttackSpeed attackSpeed = player.Value.Get<AttackSpeed>();
+            attackSpeed.CurrentAttackSpeed += attackSpeed.BaseAttackSpeed * sprite.PickupAmount;
+
             if (player.Value.TryGet(out Spell1 spell1))
             {
-                spell1.CurrentAttacksPerSecond += sprite.PickupAmount * spell1.BaseAttacksPerSecond;
+                spell1.CurrentAttacksPerSecond = attackSpeed.CurrentAttackSpeed * spell1.BaseAttacksPerSecond;
                 player.Value.Set(spell1);
             }
             if (player.Value.TryGet(out Spell2 spell2))
             {
-                spell2.CurrentAttacksPerSecond += sprite.PickupAmount * spell2.BaseAttacksPerSecond;
+                spell2.CurrentAttacksPerSecond = attackSpeed.CurrentAttackSpeed * spell2.BaseAttacksPerSecond;
                 player.Value.Set(spell2);
             }
+
+            player.Value.Set(attackSpeed);
             world.TryDestroy(entity);
         }
 
         private void processDamage(Entity entity, Entity? player, PickupSprite sprite)
         {
+            SpellDamage spellDamage = player.Value.Get<SpellDamage>();
+            spellDamage.CurrentSpellDamage += spellDamage.BaseSpellDamage * sprite.PickupAmount;
+
             if (player.Value.TryGet(out Spell1 spell1))
             {
-                spell1.CurrentDamage += sprite.PickupAmount * spell1.BaseDamage;
+                spell1.CurrentDamage = spellDamage.CurrentSpellDamage * spell1.BaseDamage;
                 player.Value.Set(spell1);
             }
             if (player.Value.TryGet(out Spell2 spell2))
             {
-                spell2.CurrentDamage += sprite.PickupAmount * spell2.BaseDamage;
+                spell2.CurrentDamage = spellDamage.CurrentSpellDamage * spell2.BaseDamage;
                 player.Value.Set(spell2);
             }
+
+            player.Value.Set(spellDamage);
             world.TryDestroy(entity);
         }
 
         private void processSpellEffectChance(Entity entity, Entity? player, PickupSprite sprite)
         {
+            SpellEffectChance spellEffectChance = player.Value.Get<SpellEffectChance>();
+            spellEffectChance.CurrentSpellEffectChance += spellEffectChance.BaseSpellEffectChance * sprite.PickupAmount;
+
             if (player.Value.TryGet(out Spell1 spell1))
             {
-                spell1.CurrentEffectChance += sprite.PickupAmount * spell1.BaseEffectChance;
+                spell1.CurrentEffectChance = spellEffectChance.CurrentSpellEffectChance * spell1.BaseEffectChance;
                 player.Value.Set(spell1);
             }
             if (player.Value.TryGet(out Spell2 spell2))
             {
-                spell2.CurrentEffectChance += sprite.PickupAmount * spell2.BaseEffectChance;
+                spell2.CurrentEffectChance = spellEffectChance.CurrentSpellEffectChance * spell2.BaseEffectChance;
                 player.Value.Set(spell2);
             }
+
+            player.Value.Set(spellEffectChance);
             world.TryDestroy(entity);
         }
     }

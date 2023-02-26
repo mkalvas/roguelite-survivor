@@ -6,11 +6,6 @@ using Box2D.NetStandard.Dynamics.World;
 using Box2D.NetStandard.Dynamics.World.Callbacks;
 using RogueliteSurvivor.Components;
 using RogueliteSurvivor.Constants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Physics
 {
@@ -41,60 +36,55 @@ namespace RogueliteSurvivor.Physics
                     }
                     else if ((a.Has<Projectile>() && b.Has<Enemy>()) || (b.Has<Projectile>() && a.Has<Enemy>()))
                     {
-                        Projectile p;
-                        EntityState state;
+                        EntityStatus state;
                         Damage damage;
                         Owner owner;
-                        if (!a.TryGet(out p))
+                        if (a.Has<Projectile>())
                         {
-                            b.TryGet(out p);
-                            state = p.State;
-                            damage = b.Get<Damage>();
-                            owner = b.Get<Owner>();
-                            setProjectileDead(b, p);
+                            state = b.Get<EntityStatus>();
+                            damage = a.Get<Damage>();
+                            owner = a.Get<Owner>();
+                            setEntityDead(a, state);
                         }
                         else
                         {
-                            state = p.State;
-                            damage = a.Get<Damage>();
-                            owner = a.Get<Owner>();
-                            setProjectileDead(a, p);
+                            state = b.Get<EntityStatus>();
+                            damage = b.Get<Damage>();
+                            owner = b.Get<Owner>();
+                            setEntityDead(b, state);
                         }
 
-                        if (state == EntityState.Alive)
+                        if (state.State == State.Alive)
                         {
                             damageEnemy(a, b, damage, owner);
                         }
                     }
                     else if ((a.Has<SingleTarget>() && b.Has<Enemy>()) || (b.Has<SingleTarget>() && a.Has<Enemy>()))
                     {
-                        SingleTarget p;
                         Damage damage;
                         Owner owner;
-                        if (!a.TryGet(out p))
-                        {
-                            b.TryGet(out p);
-                            damage = b.Get<Damage>();
-                            owner = b.Get<Owner>();
-                        }
-                        else
+                        if (a.Has<SingleTarget>())
                         {
                             damage = a.Get<Damage>();
                             owner = a.Get<Owner>();
+                        }
+                        else
+                        {
+                            damage = b.Get<Damage>();
+                            owner = b.Get<Owner>();
                         }
 
                         damageEnemy(a, b, damage, owner);
                     }
                     else if ((a.Has<Projectile>() && b.Has<Map>()) || (b.Has<Projectile>() && a.Has<Map>()))
                     {
-                        if (!a.TryGet(out Projectile p))
+                        if (a.Has<Projectile>())
                         {
-                            b.TryGet(out p);
-                            setProjectileDead(b, p);
+                            setEntityDead(a, a.Get<EntityStatus>());
                         }
                         else
                         {
-                            setProjectileDead(a, p);
+                            setEntityDead(b, b.Get<EntityStatus>());
                         }
                     }
                 }
@@ -103,28 +93,26 @@ namespace RogueliteSurvivor.Physics
 
         private void damageEnemy(Entity a, Entity b, Damage damage, Owner owner)
         {
-            Enemy e;
-            if (!a.TryGet(out e))
+            if (a.Has<Enemy>())
             {
-                b.TryGet(out e);
-                setEnemyHealthAndState(b, e, damage, owner);
+                setEnemyHealthAndState(a, a.Get<EntityStatus>(), damage, owner);
             }
             else
             {
-                setEnemyHealthAndState(a, e, damage, owner);
+                setEnemyHealthAndState(b, b.Get<EntityStatus>(), damage, owner);
             }
         }
 
-        private void setEnemyHealthAndState(Entity entity, Enemy enemy, Damage damage, Owner owner)
+        private void setEnemyHealthAndState(Entity entity, EntityStatus entityStatus, Damage damage, Owner owner)
         {
-            if (enemy.State == EntityState.Alive)
+            if (entityStatus.State == State.Alive)
             {
                 Health health = entity.Get<Health>();
                 health.Current -= (int)damage.Amount;
                 if (health.Current < 1)
                 {
-                    enemy.State = EntityState.ReadyToDie;
-                    entity.Set(enemy);
+                    entityStatus.State = State.ReadyToDie;
+                    entity.Set(entityStatus);
                     KillCount killCount = owner.Entity.Get<KillCount>();
                     killCount.Count++;
                     owner.Entity.Set(killCount);
@@ -133,64 +121,75 @@ namespace RogueliteSurvivor.Physics
                 {
                     Animation anim = entity.Get<Animation>();
                     anim.Overlay = Microsoft.Xna.Framework.Color.Red;
-                    entity.SetRange(health, anim);
-                    if(damage.SpellEffect != SpellEffects.None)
+                    if (entity.IsAlive())
                     {
-                        switch(damage.SpellEffect)
+                        entity.SetRange(health, anim);
+                        if (damage.SpellEffect != SpellEffects.None)
                         {
-                            case SpellEffects.Burn:
-                                if (!entity.Has<Burn>())
-                                {
-                                    entity.Add<Burn>();
-                                }
-                                entity.Set(new Burn() { TimeLeft = 5f, TickRate = .5f, NextTick = .5f });
-                                break;
-                            case SpellEffects.Slow:
-                                if (!entity.Has<Slow>())
-                                {
-                                    entity.Add<Slow>();
-                                }
-                                entity.Set(new Slow() { TimeLeft = 5f });
-                                break;
-                            case SpellEffects.Shock:
-                                if (!entity.Has<Shock>())
-                                {
-                                    entity.Add<Shock>();
-                                }
-                                entity.Set(new Shock() { TimeLeft = 1f });
-                                break;
+                            switch (damage.SpellEffect)
+                            {
+                                case SpellEffects.Burn:
+                                    if (!entity.Has<Burn>())
+                                    {
+                                        entity.Add(new Burn() { TimeLeft = 5f, TickRate = .5f, NextTick = .5f });
+                                    }
+                                    else
+                                    {
+                                        entity.Set(new Burn() { TimeLeft = 5f, TickRate = .5f, NextTick = .5f });
+                                    }
+                                    break;
+                                case SpellEffects.Slow:
+                                    if (!entity.Has<Slow>())
+                                    {
+                                        entity.Add(new Slow() { TimeLeft = 5f });
+                                    }
+                                    else
+                                    {
+                                        entity.Set(new Slow() { TimeLeft = 5f });
+                                    }
+                                    break;
+                                case SpellEffects.Shock:
+                                    if (!entity.Has<Shock>())
+                                    {
+                                        entity.Add(new Shock() { TimeLeft = 1f });
+                                    }
+                                    else
+                                    {
+                                        entity.Set(new Shock() { TimeLeft = 1f });
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
             }
         }
 
-        private void setProjectileDead(Entity entity, Projectile projectile)
+        private void setEntityDead(Entity entity, EntityStatus entityStatus)
         {
-            if (projectile.State == EntityState.Alive)
+            if (entityStatus.State == State.Alive)
             {
-                projectile.State = EntityState.ReadyToDie;
-                entity.Set(projectile);
+                entityStatus.State = State.ReadyToDie;
+                entity.Set(entityStatus);
             }
         }
 
         private void damagePlayer(Entity a, Entity b)
         {
-            if (!a.TryGet(out Player e))
+            if (a.Has<Player>())
             {
-                b.TryGet(out e);
-                setPlayerHealthAndState(b, a, e);
+                setPlayerHealthAndState(a, b, a.Get<EntityStatus>());
             }
             else
             {
-                setPlayerHealthAndState(a, b, e);
+                setPlayerHealthAndState(b, a, b.Get<EntityStatus>());
             }
         }
 
-        private void setPlayerHealthAndState(Entity entity, Entity other, Player player)
-        {   
+        private void setPlayerHealthAndState(Entity entity, Entity other, EntityStatus entityStatus)
+        {
             var attackSpeed = other.Get<Spell1>();
-            if(attackSpeed.Cooldown > attackSpeed.CurrentAttackSpeed)
+            if (attackSpeed.Cooldown > attackSpeed.CurrentAttackSpeed)
             {
                 attackSpeed.Cooldown -= attackSpeed.CurrentAttackSpeed;
                 Health health = entity.Get<Health>();
@@ -198,25 +197,25 @@ namespace RogueliteSurvivor.Physics
                 health.Current -= (int)damage.Amount;
                 Animation anim = entity.Get<Animation>();
                 anim.Overlay = Microsoft.Xna.Framework.Color.Red;
-                
-                if(health.Current < 1)
+
+                if (health.Current < 1)
                 {
-                    player.State = EntityState.Dead;
+                    entityStatus.State = State.Dead;
                 }
 
-                entity.SetRange(health, anim, player);
+                entity.SetRange(health, anim, entityStatus);
                 other.Set(attackSpeed);
             }
         }
 
         public override void PostSolve(in Contact contact, in ContactImpulse impulse)
         {
-            
+
         }
 
         public override void PreSolve(in Contact contact, in Manifold oldManifold)
         {
-            
+
         }
     }
 }

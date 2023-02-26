@@ -1,14 +1,9 @@
-﻿using Arch.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Xna.Framework;
 
 namespace RogueliteSurvivor.Components
 {
     public struct Target
     {
-        public Entity Entity { get; set; }
+        public Vector2 TargetPosition { get; set; }
     }
 }

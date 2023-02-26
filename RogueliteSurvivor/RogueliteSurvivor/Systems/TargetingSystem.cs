@@ -2,11 +2,6 @@
 using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using RogueliteSurvivor.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Systems
 {
@@ -22,47 +17,32 @@ namespace RogueliteSurvivor.Systems
                                 .WithAny<Player, Enemy>())
         { }
 
-        public void Update(GameTime gameTime, float totalElapsedTime) 
+        public void Update(GameTime gameTime, float totalElapsedTime)
         {
             world.Query(in query, (in Entity entity, ref Position pos, ref Target target) =>
             {
                 if (entity.IsAlive())
                 {
-                    Entity? targetEntity = findTarget(entity.Has<Enemy>() ? playerQuery : enemyQuery, pos.XY);
-
-                    if (targetEntity.HasValue)
-                    {
-                        target.Entity = targetEntity.Value;
-                    }
+                    target.TargetPosition = findTarget(entity.Has<Enemy>() ? playerQuery : enemyQuery, pos.XY);
                 }
             });
         }
 
-        private Entity? findTarget(QueryDescription targetQuery, Vector2 sourcePosition)
+        private Vector2 findTarget(QueryDescription targetQuery, Vector2 sourcePosition)
         {
-            Entity? target = null;
             Vector2 targetPos = new Vector2(9999, 9999);
             world.Query(in targetQuery, (in Entity other, ref Position otherPos) =>
             {
-                if (other.IsAlive() && (!other.Has<Enemy>() || other.Get<Enemy>().State != Constants.EntityState.Dead))
+                if (other.IsAlive() && (!other.Has<Enemy>() || other.Get<EntityStatus>().State != Constants.State.Dead))
                 {
-                    if (!target.HasValue)
+                    if (Vector2.Distance(sourcePosition, otherPos.XY) < Vector2.Distance(sourcePosition, targetPos))
                     {
                         targetPos = otherPos.XY;
-                        target = other;
-                    }
-                    else
-                    {
-                        if (Vector2.Distance(sourcePosition, otherPos.XY) < Vector2.Distance(sourcePosition, targetPos))
-                        {
-                            targetPos = otherPos.XY;
-                            target = other;
-                        }
                     }
                 }
             });
 
-            return target;
+            return targetPos;
         }
     }
 }

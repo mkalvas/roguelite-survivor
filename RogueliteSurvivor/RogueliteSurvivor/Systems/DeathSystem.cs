@@ -9,18 +9,11 @@ using RogueliteSurvivor.Constants;
 using RogueliteSurvivor.Containers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RogueliteSurvivor.Systems
 {
     public class DeathSystem : ArchSystem, IUpdateSystem
     {
-        QueryDescription projectileQuery = new QueryDescription()
-                                            .WithAll<Projectile>();
-        QueryDescription enemyQuery = new QueryDescription()
-                                            .WithAll<Enemy>();
         QueryDescription singleTargetQuery = new QueryDescription()
                                             .WithAll<SingleTarget>();
 
@@ -29,67 +22,54 @@ namespace RogueliteSurvivor.Systems
         Dictionary<Spells, SpellContainer> spellContainers;
         Random random;
         public DeathSystem(World world, Dictionary<string, Texture2D> textures, Box2D.NetStandard.Dynamics.World.World physicsWorld, Dictionary<Spells, SpellContainer> spellContainers)
-            : base(world, new QueryDescription())
-        { 
+            : base(world, new QueryDescription()
+                                .WithAny<Projectile, Enemy>())
+        {
             this.textures = textures;
             this.physicsWorld = physicsWorld;
             this.spellContainers = spellContainers;
             random = new Random();
         }
 
-        public void Update(GameTime gameTime, float totalElapsedTime) 
+        public void Update(GameTime gameTime, float totalElapsedTime)
         {
-            world.Query(in projectileQuery, (ref Projectile projectile, ref SpriteSheet spriteSheet, ref Animation animation, ref Body body) =>
+            world.Query(in query, (in Entity entity, ref EntityStatus entityStatus, ref SpriteSheet spriteSheet, ref Animation animation, ref Body body) =>
             {
-                if (projectile.State == EntityState.ReadyToDie)
+                if (entityStatus.State == State.ReadyToDie)
                 {
-                    projectile.State = EntityState.Dying;
+                    entityStatus.State = State.Dying;
                     physicsWorld.DestroyBody(body);
-                    Spells spell = spriteSheet.TextureName.GetSpellFromString();
-                    animation = SpellFactory.GetSpellHitAnimation(spellContainers[spell]);
-                    spriteSheet = SpellFactory.GetSpellHitSpriteSheet(textures, spellContainers[spell], spriteSheet.Rotation); 
-                }
-                else if (projectile.State == EntityState.Dying)
-                {
-                    if (animation.CurrentFrame == animation.LastFrame)
+                    if (entity.Has<Projectile>())
                     {
-                        projectile.State = EntityState.Dead;
+                        Spells spell = spriteSheet.TextureName.GetSpellFromString();
+                        animation = SpellFactory.GetSpellHitAnimation(spellContainers[spell]);
+                        spriteSheet = SpellFactory.GetSpellHitSpriteSheet(textures, spellContainers[spell], spriteSheet.Rotation);
                     }
+                    else
+                    {
+                        int bloodToUse = random.Next(1, 9);
+                        spriteSheet = new SpriteSheet(textures["MiniBlood" + bloodToUse], "MiniBlood" + bloodToUse, getMiniBloodNumFrames(bloodToUse), 1, 0, spriteSheet.Width == 16 ? .5f : 1f);
+                        animation = new Animation(0, getMiniBloodNumFrames(bloodToUse) - 1, 1 / 60f, 1, false);
+                    }
+                }
+                else if (entityStatus.State == State.Dying && animation.CurrentFrame == animation.LastFrame)
+                {
+                    entityStatus.State = State.Dead;
                 }
             });
 
-            world.Query(in enemyQuery, (ref Enemy enemy, ref SpriteSheet spriteSheet, ref Animation animation, ref Body body) =>
+            world.Query(in singleTargetQuery, (ref EntityStatus entityStatus, ref SingleTarget single, ref Animation animation, ref Body body) =>
             {
-                if(enemy.State == EntityState.ReadyToDie)
+                if (entityStatus.State == State.Alive && single.DamageEndDelay < 0)
                 {
-                    enemy.State = EntityState.Dying;
+                    entityStatus.State = State.Dying;
                     physicsWorld.DestroyBody(body);
-                    int bloodToUse = random.Next(1, 9);
-                    spriteSheet = new SpriteSheet(textures["MiniBlood" + bloodToUse], "MiniBlood" + bloodToUse, getMiniBloodNumFrames(bloodToUse), 1, 0, spriteSheet.Width == 16 ? .5f : 1f);
-                    animation = new Animation(0, getMiniBloodNumFrames(bloodToUse) - 1, 1 / 60f, 1, false);
                 }
-                else if(enemy.State == EntityState.Dying)
+                else if (entityStatus.State == State.Dying
+                            && animation.CurrentFrame == animation.LastFrame)
                 {
-                    if(animation.CurrentFrame == animation.LastFrame)
-                    {
-                        enemy.State = EntityState.Dead;
-                    }
-                }
-            });
+                    entityStatus.State = State.Dead;
 
-            world.Query(in singleTargetQuery, (ref SingleTarget single, ref Animation animation, ref Body body) =>
-            {
-                if (single.State == EntityState.Alive && single.DamageEndDelay < 0)
-                {
-                    single.State = EntityState.Dying;
-                    physicsWorld.DestroyBody(body);
-                }
-                else if (single.State == EntityState.Dying)
-                {
-                    if (animation.CurrentFrame == animation.LastFrame)
-                    {
-                        single.State = EntityState.Dead;
-                    }
                 }
             });
         }
