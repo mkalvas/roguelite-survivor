@@ -22,15 +22,18 @@ namespace RogueliteSurvivor.Systems
 
         public void Render(GameTime gameTime, SpriteBatch spriteBatch, Dictionary<string, Texture2D> textures, Entity player, float totalElapsedTime, GameState gameState, int layer)
         {
-            if (layer == 2)
+            if (layer == 1)
             {
                 Vector2 playerPosition = player.Get<Position>().XY;
                 Vector2 offset = new Vector2(graphics.PreferredBackBufferWidth / 6, graphics.PreferredBackBufferHeight / 6);
 
                 world.Query(in query, (ref EntityStatus entityStatus, ref Position pos, ref Animation anim, ref SpriteSheet sprite) =>
                 {
-                    Vector2 position = pos.XY - playerPosition;
-                    renderEntity(spriteBatch, textures, sprite, anim, position, offset);
+                    if (entityStatus.State != EntityState.Dead)
+                    {
+                        Vector2 position = pos.XY - playerPosition;
+                        renderEntity(spriteBatch, textures, sprite, anim, position, offset);
+                    }
                 });
             }
         }
@@ -48,7 +51,7 @@ namespace RogueliteSurvivor.Systems
                         new Vector2(sprite.Width / 2, sprite.Height / 2),
                         sprite.Scale,
                         SpriteEffects.None,
-                        .05f
+                        .075f
                     );
             }
         }
