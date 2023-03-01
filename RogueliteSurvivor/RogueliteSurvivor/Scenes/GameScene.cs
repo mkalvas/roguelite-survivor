@@ -123,6 +123,7 @@ namespace RogueliteSurvivor.Scenes
             fonts = new Dictionary<string, SpriteFont>()
             {
                 { "Font", Content.Load<SpriteFont>(Path.Combine("Fonts", "Font")) },
+                { "FontSmall", Content.Load<SpriteFont>(Path.Combine("Fonts", "FontSmall")) },
             };
         }
 
@@ -180,6 +181,8 @@ namespace RogueliteSurvivor.Scenes
 
         private void initializeSystems()
         {
+            var renderHud = new RenderHudSystem(world, _graphics, fonts);
+
             updateSystems = new List<IUpdateSystem>
             {
                 new PlayerInputSystem(world),
@@ -194,6 +197,7 @@ namespace RogueliteSurvivor.Scenes
                 new AttackSystem(world, textures, physicsWorld, spellContainers),
                 new AttackSpellCleanupSystem(world),
                 new DeathSystem(world, textures, physicsWorld, spellContainers),
+                renderHud,
             };
 
             renderSystems = new List<IRenderSystem>
@@ -201,7 +205,7 @@ namespace RogueliteSurvivor.Scenes
                 new RenderMapSystem(world, _graphics),
                 new RenderPickupSystem(world, _graphics),
                 new RenderSpriteSystem(world, _graphics),
-                new RenderHudSystem(world, _graphics, fonts),
+                renderHud,
             };
         }
 
