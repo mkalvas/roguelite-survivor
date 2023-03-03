@@ -14,6 +14,7 @@ using RogueliteSurvivor.Extensions;
 using RogueliteSurvivor.Physics;
 using RogueliteSurvivor.Systems;
 using RogueliteSurvivor.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -57,9 +58,9 @@ namespace RogueliteSurvivor.Scenes
         public override void LoadContent()
         {
             resetWorld();
-            loadMap();
-
             loadTexturesAndFonts();
+
+            loadMap();
             loadEnemies();
             loadSpells();
             initializeSystems();
@@ -75,20 +76,6 @@ namespace RogueliteSurvivor.Scenes
         {
             textures = new Dictionary<string, Texture2D>
             {
-                { "player", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character")) },
-                { "player_blue", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character_blue")) },
-                { "player_yellow", Content.Load<Texture2D>(Path.Combine("Player", "Animated_Mage_Character_yellow")) },
-
-                { "VampireBat", Content.Load<Texture2D>(Path.Combine("Enemies", "VampireBat")) },
-                { "GhastlyBeholder", Content.Load<Texture2D>(Path.Combine("Enemies", "GhastlyBeholderIdleSide")) },
-                { "GraveRevenant", Content.Load<Texture2D>(Path.Combine("Enemies", "GraveRevenantIdleSide")) },
-                { "BloodLich", Content.Load<Texture2D>(Path.Combine("Enemies", "BloodLichIdleSide")) },
-                { "GnollGrunt", Content.Load<Texture2D>(Path.Combine("Enemies", "GnollGruntIdleSide")) },
-                { "GnollPikeman", Content.Load<Texture2D>(Path.Combine("Enemies", "GnollPikemanIdleSide")) },
-                { "OrcSavage", Content.Load<Texture2D>(Path.Combine("Enemies", "OrcSavageIdleSide")) },
-                { "OrcShaman", Content.Load<Texture2D>(Path.Combine("Enemies", "OrcShamanIdleSide")) },
-                { "OrcJuggernaut", Content.Load<Texture2D>(Path.Combine("Enemies", "OrcJuggernautIdleSide")) },
-
                 { "Fireball", Content.Load<Texture2D>(Path.Combine("Spells", "fireball")) },
                 { "IceShard", Content.Load<Texture2D>(Path.Combine("Spells", "ice-shard")) },
                 { "LightningBlast", Content.Load<Texture2D>(Path.Combine("Spells", "lightning-blast")) },
@@ -115,15 +102,11 @@ namespace RogueliteSurvivor.Scenes
                 { "Blood3", Content.Load<Texture2D>(Path.Combine("Effects", "blood-3")) },
                 { "Blood4", Content.Load<Texture2D>(Path.Combine("Effects", "blood-4")) },
                 { "Blood5", Content.Load<Texture2D>(Path.Combine("Effects", "blood-5")) },
+
                 { "IceShardHit", Content.Load<Texture2D>(Path.Combine("Effects", "ice-shard-hit")) },
                 { "LightningBlastHit", Content.Load<Texture2D>(Path.Combine("Effects", "lightning-blast-hit")) },
                 { "FireballHit", Content.Load<Texture2D>(Path.Combine("Effects", "fireball-hit")) },
             };
-
-            foreach(var tilesetImage in mapContainer.TilesetImages)
-            {
-                textures.Add(tilesetImage.ToLower(), Content.Load<Texture2D>(Path.Combine("Maps", mapContainer.Folder, tilesetImage)));
-            }
 
             fonts = new Dictionary<string, SpriteFont>()
             {
@@ -220,10 +203,28 @@ namespace RogueliteSurvivor.Scenes
 
             var mapEntity = world.Create<Map, MapInfo>();
             mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder, mapContainer.MapFilename), Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder), physicsWorld, mapEntity));
+
+            foreach (var tilesetImage in mapContainer.TilesetImages)
+            {
+                textures.Add(tilesetImage.ToLower(), Content.Load<Texture2D>(Path.Combine("Maps", mapContainer.Folder, tilesetImage)));
+            }
+
+            foreach(var wave in mapContainer.EnemyWaves)
+            {
+                foreach(var enemy in wave.Enemies)
+                {
+                    if(!textures.ContainsKey(enemy.Type))
+                    {
+                        textures.Add(enemy.Type, Content.Load<Texture2D>(Path.Combine("Enemies", enemy.Type)));
+                    }
+                }
+            }
         }
 
         private void placePlayer()
         {
+            textures.Add(playerContainers[gameSettings.PlayerName].Texture, Content.Load<Texture2D>(Path.Combine("Player", playerContainers[gameSettings.PlayerName].Texture)));
+
             var body = new BodyDef();
             body.position = new System.Numerics.Vector2(mapContainer.Start.X, mapContainer.Start.Y) / PhysicsConstants.PhysicsToPixelsRatio;
             body.fixedRotation = true;
