@@ -202,9 +202,9 @@ namespace RogueliteSurvivor.Scenes
 
             renderSystems = new List<IRenderSystem>
             {
-                new RenderMapSystem(world, _graphics),
-                new RenderPickupSystem(world, _graphics),
                 new RenderSpriteSystem(world, _graphics),
+                new RenderPickupSystem(world, _graphics),
+                new RenderMapSystem(world, _graphics),
                 renderHud,
             };
         }
@@ -214,7 +214,7 @@ namespace RogueliteSurvivor.Scenes
             mapContainer = mapContainers[gameSettings.MapName];
 
             var mapEntity = world.Create<Map, MapInfo>();
-            mapEntity.SetRange(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder, mapContainer.MapFilename), Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder), physicsWorld, mapEntity));
+            mapEntity.Set(new Map(), new MapInfo(Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder, mapContainer.MapFilename), Path.Combine(Content.RootDirectory, "Maps", mapContainer.Folder), physicsWorld, mapEntity, mapContainer.Spawnables));
 
             foreach (var tilesetImage in mapContainer.TilesetImages)
             {
@@ -243,7 +243,7 @@ namespace RogueliteSurvivor.Scenes
 
             player = world.Create<Player, EntityStatus, Position, Velocity, Speed, AttackSpeed, SpellDamage, SpellEffectChance, Pierce, AreaOfEffect, Animation, SpriteSheet, Target, Spell1, Spell2, Health, KillCount, Body>();
 
-            player.SetRange(
+            player.Set(
                 new Player() { Level = 1, ExperienceToNextLevel = ExperienceHelper.ExperienceRequiredForLevel(2), TotalExperience = 0 },
                 new EntityStatus(),
                 new Position() { XY = new Vector2(mapContainer.Start.X, mapContainer.Start.Y) },
@@ -374,7 +374,7 @@ namespace RogueliteSurvivor.Scenes
         {
             if (gameState != GameState.LevelUp)
             {
-                for (int layer = 1; layer < 3; layer++)
+                for (int layer = 1; layer < 5; layer++)
                 {
                     foreach (var system in renderSystems)
                     {

@@ -390,13 +390,13 @@
 /processorParam:TextureFormat=Color
 /build:Hud/StatsBackground.png
 
-#begin Maps/Demo/Demo.tmx
-/copy:Maps/Demo/Demo.tmx
+#begin Maps/The Beginning/The Beginning.tmx
+/copy:Maps/The Beginning/The Beginning.tmx
 
-#begin Maps/Demo/Dungeon - Tiles.tsx
-/copy:Maps/Demo/Dungeon - Tiles.tsx
+#begin Maps/The Beginning/The Church.tmx
+/copy:Maps/The Beginning/The Church.tmx
 
-#begin Maps/Demo/Tiles.png
+#begin Maps/The Beginning/Tileset.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -406,18 +406,12 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Maps/Demo/Tiles.png
+/build:Maps/The Beginning/Tileset.png
 
-#begin Maps/Plateau/Forest - Props.tsx
-/copy:Maps/Plateau/Forest - Props.tsx
+#begin Maps/The Beginning/Tileset.tsx
+/copy:Maps/The Beginning/Tileset.tsx
 
-#begin Maps/Plateau/Forest - Tiles.tsx
-/copy:Maps/Plateau/Forest - Tiles.tsx
-
-#begin Maps/Plateau/Plateau.tmx
-/copy:Maps/Plateau/Plateau.tmx
-
-#begin Maps/Plateau/Props.png
+#begin Maps/The Beginning/WallTops.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -427,37 +421,10 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Maps/Plateau/Props.png
+/build:Maps/The Beginning/WallTops.png
 
-#begin Maps/Plateau/Tiles.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Maps/Plateau/Tiles.png
-
-#begin Maps/Stress Test/Stress Test.tmx
-/copy:Maps/Stress Test/Stress Test.tmx
-
-#begin Maps/Stress Test/Tileset.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Maps/Stress Test/Tileset.png
-
-#begin Maps/Stress Test/Tileset.tsx
-/copy:Maps/Stress Test/Tileset.tsx
+#begin Maps/The Beginning/WallTops.tsx
+/copy:Maps/The Beginning/WallTops.tsx
 
 #begin Pickups/player-pickups.png
 /importer:TextureImporter
